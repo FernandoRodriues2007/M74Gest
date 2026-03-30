@@ -28,11 +28,11 @@ function Home() {
     const [page, setPage] = useState('home');
 
     if (page === 'login') {
-        return <Login onBack={() => setPage('home')} />;
+        return <Login  onBack={() => setPage('home')} />;
     }
 
     if (page === 'cadastro') {
-        return <Cadastro onBack={() => setPage('home')} />;
+        return <Cadastro  onBack={() => setPage('home')} />;
     }
 
     const links = [
