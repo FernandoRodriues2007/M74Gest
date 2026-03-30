@@ -1,0 +1,22 @@
+.border-spin {
+    border: 2px solid transparent;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        border-color: #d1ce25;
+    }
+    25% {
+        border-color: #db8534;
+    }
+    50% {
+        border-color: #569967;
+    }
+        75% {
+            border-color: #db3487;
+        }
+    100% {
+        border-color: hsl(59, 100%, 50%);
+    }
+}

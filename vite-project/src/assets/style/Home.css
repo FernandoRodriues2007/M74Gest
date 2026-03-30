@@ -1,0 +1,59 @@
+/* Animações adicionais para efeitos suaves */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Stagger animation support */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+ 
+.into-view {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0; /* Inicialmente oculto */
+}
+.into-dashboard {
+    animation: scaleIn 3s ease-out forwards;
+    animation-delay: 0.3s; /* Atraso para criar efeito de cascata */
+    opacity: 0; /* Inicialmente oculto */
+}
+
+@keyframes slideInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
