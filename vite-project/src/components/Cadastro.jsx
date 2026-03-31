@@ -15,7 +15,7 @@ function Cadastro({ onBack }) {
         <div className="flex items-center justify-center h-screen bg-slate-800">
             <div className=" grid grid-cols-1 md:grid-cols-2 text-center bg-slate-800 text-white md:p-14 ">
 
-                <Infodoformulario Title="Seja Bem Vindo a M74" Nome="Login" Function={() => setPage('Login')} />
+                <Infodoformulario Title="Seja Bem Vindo a M74" Nome="Login" Function={() => setPage('Login')} Texto="Já tem uma conta? Faça login agora." />
 
 
                 <div className="max-w-md p-8 rounded-lg shadow-md ">

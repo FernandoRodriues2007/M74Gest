@@ -18,7 +18,7 @@ function Login({ onBack }) {
             <div className="grid grid-cols-1 md:grid-cols-2 text-center bg-slate-800 text-white md:p-14">
 
 
-                <Infodoformulario Title="Bem Vindo de Volta" Nome="Cadastrar" Function={() => setPage('Cadastro')} />
+                <Infodoformulario Title="Bem Vindo de Volta" Nome="Cadastrar" Function={() => setPage('Cadastro')} Texto="Para continuar, por favor, faça login com suas credenciais." />
 
 
                 <div className=" p-8 rounded-lg  w-full max-w-md ">
