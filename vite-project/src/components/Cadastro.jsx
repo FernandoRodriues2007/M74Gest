@@ -1,9 +1,10 @@
 import "../assets/style/cadastro.css";
-import { UserCircle, ArrowLeft } from "lucide-react";
+import { UserCircle, ArrowLeft,UserPlus } from "lucide-react";
 import Infodoformulario from "./Infodoformulario";
 import Button from "./Button";
 import Login from "./Login";
-import Input from "./Input"
+import Input from "./Input";
+import Links from "./links";
 import { useState } from "react";
 
 function Cadastro({ onBack }) {
@@ -15,14 +16,15 @@ function Cadastro({ onBack }) {
         <div className="flex items-center justify-center h-screen bg-slate-800">
             <div className=" grid grid-cols-1 md:grid-cols-2 text-center bg-slate-800 text-white md:p-14 ">
 
-                <Infodoformulario Title="Seja Bem Vindo a M74" Nome="Login" Function={() => setPage('Login')} Texto="Já tem uma conta? Faça login agora." />
+                <Infodoformulario Title="Seja Bem Vindo a M74" Nome="Login" Function={() => setPage('Login')} Texto="Já tem uma conta? Faça login agora dando um click no botão á baixo" />
 
 
-                <div className="max-w-md p-8 rounded-lg shadow-md ">
+                <div className="w-full max-w-md p-8 rounded-lg  ">
 
-                    <form className="space-y-8">
+                    <form className="">
                         <div className="mb-6 p-4 flex justify-center">
-                            <UserCircle className="   h-14 w-14" />
+                            <UserPlus className="   h-14 w-14" />
+                            <Links Href="#" Tetx="Test"  />
 
                         </div>
 
@@ -39,6 +41,7 @@ function Cadastro({ onBack }) {
                         <ArrowLeft className="h-4 w-4 inline mr-2" />
                         Voltar
                     </button>
+                    
                 </div>
             </div>
         </div>

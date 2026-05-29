@@ -5,6 +5,7 @@ import Button from "./Button";
 import { useState } from "react";
 import Cadastro from "./Cadastro";
 import Input from "./Input"
+import Dash from "./dashboard"; 
 
 function Login({ onBack }) {
     const [page, setPage] = useState('Login');
@@ -12,13 +13,16 @@ function Login({ onBack }) {
     if (page === 'Cadastro') {
         return <Cadastro onBack={() => setPage('Login')} />;
     }
+    if(page === 'dashboard'){
+        return <Dash/>
+    }
 
     return (
-        <div className="flex items-center justify-center h-screen bg-slate-800">
+        <div className="flex items-center justify-center h-screen bg-slate-800 " animation="animate-fadeInUp">
             <div className="grid grid-cols-1 md:grid-cols-2 text-center bg-slate-800 text-white md:p-14">
 
 
-                <Infodoformulario Title="Bem Vindo de Volta" Nome="Cadastrar" Function={() => setPage('Cadastro')} Texto="Para continuar, por favor, faça login com suas credenciais." />
+                <Infodoformulario Title="Bem Vindo de Volta" Nome="Cadastrar" Function={() => setPage('Cadastro')} Texto="Para continuar, faça login com suas credenciais." />
 
 
                 <div className=" p-8 rounded-lg  w-full max-w-md ">
@@ -34,7 +38,7 @@ function Login({ onBack }) {
 
                         <div className="flex justify-center">
 
-                            <Button texto="Login" onClick={() => alert("Login clicado")} />
+                            <Button texto="Login" onClick={() => setPage('dashboard')} />
                         </div>
                     </form>
                     <button type="button" className="w-24 py-2 rounded-full text-sm mb-4  text-white  hover:bg-slate-700" onClick={onBack}>
