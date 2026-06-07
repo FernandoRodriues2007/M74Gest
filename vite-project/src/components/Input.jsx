@@ -1,12 +1,14 @@
-function Input({ id, type, placeholder }) {
+function Input(props) {
     return (
         <div className="mb-6">
             
             <input
-                type={type}
-                id={id}
+                type={props.type}
+                id={props.id}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
-                placeholder={placeholder}
+                placeholder={props.placeholder}
+                onChange={props.function}
+                value={props.value}
             />
         </div>
     );

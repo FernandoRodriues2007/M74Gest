@@ -27,7 +27,7 @@ function dash() {
                 <Title Title="Dashboard" />
                 <div className="flex space-x-8">
 
-                    <Infouser Nome="Fernando Rodrigues" user="Adiministador" />
+                    <Infouser Nome="Fernando Rodrigues" user="Funcionário" />
                     <UserCircle className="w-8 h-8 text-slate-800" />
                 </div>
             </header>
