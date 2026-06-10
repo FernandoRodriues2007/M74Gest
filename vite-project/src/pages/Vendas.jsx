@@ -1,19 +1,16 @@
-import { useState } from 'react';
-import { Plus, Search, Trash2, TrendingUp, Calendar } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Search, Trash2, TrendingUp } from 'lucide-react';
+import { useAuth } from '../contexts/useAuth';
+import { api } from '../services/api';
 import { validations } from '../utils/validations';
 
 function Vendas() {
+  const { user, token } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [errors, setErrors] = useState({});
-
-  const [vendas, setVendas] = useState([
-    { id: 1, cliente: 'João Silva', produto: 'Laptop Dell XPS', quantidade: 1, preco: 15000, total: 15000, data: '2024-01-20', status: 'Concluído' },
-    { id: 2, cliente: 'Maria Santos', produto: 'Mouse Logitech', quantidade: 5, preco: 2500, total: 12500, data: '2024-01-19', status: 'Concluído' },
-    { id: 3, cliente: 'Pedro Costa', produto: 'Monitor LG 27"', quantidade: 2, preco: 12000, total: 24000, data: '2024-01-18', status: 'Pendente' },
-  ]);
-
+  const [vendas, setVendas] = useState([]);
   const [formData, setFormData] = useState({
     cliente: '',
     produto: '',
@@ -22,6 +19,29 @@ function Vendas() {
     data: new Date().toISOString().split('T')[0],
     status: 'Pendente'
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const canEdit = user?.role === 'admin';
+
+  const loadVendas = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await api.getVendas(token);
+      setVendas(response.data);
+    } catch (err) {
+      setError(err.message || 'Não foi possível carregar as vendas');
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      loadVendas();
+    }
+  }, [loadVendas, token]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -34,11 +54,11 @@ function Vendas() {
       newErrors.produto = 'Produto é obrigatório';
     }
 
-    if (validations.isEmpty(formData.quantidade) || !validations.isNumber(formData.quantidade) || formData.quantidade <= 0) {
+    if (validations.isEmpty(formData.quantidade) || !validations.isNumber(formData.quantidade) || Number(formData.quantidade) <= 0) {
       newErrors.quantidade = 'Quantidade inválida';
     }
 
-    if (validations.isEmpty(formData.preco) || !validations.isNumber(formData.preco) || formData.preco <= 0) {
+    if (validations.isEmpty(formData.preco) || !validations.isNumber(formData.preco) || Number(formData.preco) <= 0) {
       newErrors.preco = 'Preço inválido';
     }
 
@@ -54,43 +74,72 @@ function Vendas() {
   };
 
   const handleEditVenda = (venda) => {
+    if (!canEdit) {
+      alert('Apenas administradores podem editar vendas.');
+      return;
+    }
+
     setEditingId(venda.id);
-    setFormData(venda);
+    setFormData({
+      cliente: venda.cliente,
+      produto: venda.produto,
+      quantidade: venda.quantidade,
+      preco: venda.preco,
+      data: venda.data,
+      status: venda.status
+    });
     setErrors({});
     setShowModal(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) return;
 
-    const novaVenda = {
-      ...formData,
-      quantidade: parseInt(formData.quantidade),
-      preco: parseFloat(formData.preco),
-      total: parseInt(formData.quantidade) * parseFloat(formData.preco)
+    const payload = {
+      cliente: formData.cliente,
+      produto: formData.produto,
+      quantidade: Number(formData.quantidade),
+      preco: Number(formData.preco),
+      data: formData.data,
+      status: formData.status
     };
 
-    if (editingId) {
-      setVendas(vendas.map(v => v.id === editingId ? { ...novaVenda, id: editingId } : v));
-    } else {
-      setVendas([...vendas, { ...novaVenda, id: Date.now() }]);
+    try {
+      if (editingId) {
+        await api.updateVenda(token, editingId, payload);
+      } else {
+        await api.addVenda(token, payload);
+      }
+      await loadVendas();
+      setShowModal(false);
+    } catch (err) {
+      alert(err.message || 'Erro ao salvar venda.');
     }
-    setShowModal(false);
   };
 
-  const handleDeleteVenda = (id) => {
+  const handleDeleteVenda = async (id) => {
+    if (!canEdit) {
+      alert('Apenas administradores podem cancelar vendas.');
+      return;
+    }
+
     if (confirm('Tem certeza que deseja cancelar esta venda?')) {
-      setVendas(vendas.filter(v => v.id !== id));
+      try {
+        await api.deleteVenda(token, id);
+        await loadVendas();
+      } catch (err) {
+        alert(err.message || 'Erro ao cancelar venda.');
+      }
     }
   };
 
-  const vendaFiltradas = vendas.filter(v =>
+  const vendasFiltradas = vendas.filter((v) =>
     v.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
     v.produto.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalVendas = vendaFiltradas.reduce((sum, v) => sum + v.total, 0);
-  const vendaConcluidas = vendaFiltradas.filter(v => v.status === 'Concluído').length;
+  const totalVendas = vendasFiltradas.reduce((sum, v) => sum + Number(v.total), 0);
+  const vendasConcluidas = vendasFiltradas.filter((v) => v.status === 'Concluído').length;
 
   const getStatusColor = (status) => {
     return status === 'Concluído'
@@ -106,7 +155,7 @@ function Vendas() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-slate-800">Vendas</h1>
             <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
-              {vendaFiltradas.length}
+              {vendasFiltradas.length}
             </span>
           </div>
           <button
@@ -125,19 +174,19 @@ function Vendas() {
           <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-purple-600">
             <p className="text-slate-600 text-sm font-semibold mb-2">Total de Vendas</p>
             <p className="text-3xl font-bold text-purple-600">{totalVendas.toLocaleString('pt-AO')} kz</p>
-            <p className="text-slate-500 text-xs mt-2">{vendaFiltradas.length} transações</p>
+            <p className="text-slate-500 text-xs mt-2">{vendasFiltradas.length} transações</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-600">
             <p className="text-slate-600 text-sm font-semibold mb-2">Vendas Concluídas</p>
-            <p className="text-3xl font-bold text-green-600">{vendaConcluidas}</p>
-            <p className="text-slate-500 text-xs mt-2">{((vendaConcluidas / vendaFiltradas.length) * 100).toFixed(0)}% taxa de conclusão</p>
+            <p className="text-3xl font-bold text-green-600">{vendasConcluidas}</p>
+            <p className="text-slate-500 text-xs mt-2">{((vendasConcluidas / (vendasFiltradas.length || 1)) * 100).toFixed(0)}% taxa de conclusão</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-600">
             <p className="text-slate-600 text-sm font-semibold mb-2">Ticket Médio</p>
             <p className="text-3xl font-bold text-blue-600">
-              {(totalVendas / (vendaFiltradas.length || 1)).toLocaleString('pt-AO', { maximumFractionDigits: 0 })} kz
+              {(totalVendas / (vendasFiltradas.length || 1)).toLocaleString('pt-AO', { maximumFractionDigits: 0 })} kz
             </p>
             <p className="text-slate-500 text-xs mt-2">por transação</p>
           </div>
@@ -155,7 +204,16 @@ function Vendas() {
             />
             <Search className="absolute right-3 top-2.5 w-5 h-5 text-slate-400" />
           </div>
+          {!canEdit && (
+            <p className="mt-3 text-sm text-slate-500">Apenas administradores podem editar ou cancelar vendas.</p>
+          )}
         </div>
+
+        {error && (
+          <div className="bg-red-50 text-red-700 border border-red-200 rounded-lg p-4 mb-6">
+            {error}
+          </div>
+        )}
 
         {/* Tabela */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -172,8 +230,8 @@ function Vendas() {
               </tr>
             </thead>
             <tbody>
-              {vendaFiltradas.length > 0 ? (
-                vendaFiltradas.map(venda => (
+              {vendasFiltradas.length > 0 ? (
+                vendasFiltradas.map((venda) => (
                   <tr key={venda.id} className="border-b border-slate-200 hover:bg-slate-50 transition">
                     <td className="px-6 py-4 font-semibold text-slate-800">{venda.cliente}</td>
                     <td className="px-6 py-4 text-slate-600">{venda.produto}</td>
@@ -185,10 +243,18 @@ function Vendas() {
                         {venda.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4 text-center flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => handleEditVenda(venda)}
+                        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition"
+                        disabled={!canEdit}
+                      >
+                        <TrendingUp className="w-5 h-5" />
+                      </button>
                       <button
                         onClick={() => handleDeleteVenda(venda.id)}
                         className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition"
+                        disabled={!canEdit}
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -198,7 +264,7 @@ function Vendas() {
               ) : (
                 <tr>
                   <td colSpan="7" className="px-6 py-12 text-center text-slate-500">
-                    Nenhuma venda encontrada
+                    {loading ? 'Carregando vendas...' : 'Nenhuma venda encontrada'}
                   </td>
                 </tr>
               )}

@@ -3,6 +3,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { PrivateRoute, PublicRoute } from './components/ProtectedRoute';
 
 // Páginas
+import LandingPage from './components/Home';
+import Cadastro from './components/Cadastro';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Produtos from './pages/Produtos';
@@ -18,6 +20,20 @@ function App() {
         <Routes>
           {/* Rotas Públicas */}
           <Route
+            path="/"
+            element={<LandingPage />}
+          />
+
+          <Route
+            path="/cadastro"
+            element={
+              <PublicRoute>
+                <Cadastro />
+              </PublicRoute>
+            }
+          />
+
+          <Route
             path="/login"
             element={
               <PublicRoute>
@@ -28,7 +44,7 @@ function App() {
 
           {/* Rotas Privadas */}
           <Route
-            path="/"
+            path="/dashboard"
             element={
               <PrivateRoute>
                 <Home />
@@ -75,7 +91,7 @@ function App() {
           <Route
             path="/admin"
             element={
-              <PrivateRoute>
+              <PrivateRoute adminOnly>
                 <Dash />
               </PrivateRoute>
             }

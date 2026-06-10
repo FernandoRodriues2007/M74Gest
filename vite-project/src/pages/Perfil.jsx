@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { Save, Lock, ChevronLeft, Mail, Phone, FileText, MapPin, Eye, EyeOff } from 'lucide-react';
 import { validations } from '../utils/validations';
 
 function Perfil() {
   const navigate = useNavigate();
-  const { user, updateUser, logout } = useAuth();
+  const { user, updateUser, changePassword, logout } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
@@ -72,27 +72,38 @@ function Perfil() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     if (!validateForm()) return;
 
-    updateUser({
+    const result = await updateUser({
       name: formData.name,
-      email: formData.email,
       phone: formData.phone,
       nif: formData.nif,
       company: formData.company
     });
 
-    setIsEditing(false);
-    alert('Perfil atualizado com sucesso!');
+    if (result.success) {
+      setIsEditing(false);
+      alert('Perfil atualizado com sucesso!');
+    } else {
+      alert(result.message || 'Erro ao atualizar perfil.');
+    }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!validatePassword()) return;
 
-    // Simula mudança de senha
-    alert('Senha alterada com sucesso!');
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const result = await changePassword({
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword
+    });
+
+    if (result.success) {
+      alert('Senha alterada com sucesso!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } else {
+      alert(result.message || 'Erro ao alterar senha.');
+    }
   };
 
   const handleLogout = () => {
@@ -122,7 +133,7 @@ function Perfil() {
         <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
           <div className="flex flex-col md:flex-row items-start md:items-end gap-6 mb-8 pb-8 border-b border-slate-200">
             {/* Avatar */}
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center text-5xl">
+<div className="w-24 h-24 rounded-full bg-linear-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center text-5xl">
               {user?.avatar}
             </div>
 

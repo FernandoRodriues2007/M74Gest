@@ -1,105 +1,150 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-
-const AuthContext = createContext();
+import { useState, useEffect } from 'react';
+import { AuthContext } from './AuthContextObject';
+import { api } from '../services/api';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('auth_token'));
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Simula verificação de autenticação ao carregar
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-        setIsAuthenticated(true);
-      } catch (e) {
-        localStorage.removeItem('user');
+    const storedToken = localStorage.getItem('auth_token');
+
+    if (storedToken) {
+      api.me(storedToken)
+        .then((response) => {
+          if (response.success) {
+            setUser(response.data);
+            setToken(storedToken);
+            setIsAuthenticated(true);
+            localStorage.setItem('user', JSON.stringify(response.data));
+          } else {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            setToken(null);
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user');
+          setToken(null);
+          setUser(null);
+          setIsAuthenticated(false);
+        })
+        .finally(() => setIsLoading(false));
+    } else {
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          localStorage.removeItem('user');
+        }
       }
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = async (email, password) => {
     setIsLoading(true);
     try {
-      // Simula chamada à API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Validação simulada
-      if (email === 'admin@m74.ao' && password === 'admin123') {
-        const userData = {
-          id: '1',
-          email: 'admin@m74.ao',
-          name: 'Fernando Rodrigues',
-          role: 'admin',
-          avatar: '👤',
-          phone: '+244 222 000 000',
-          nif: '1234567890',
-          company: 'M74 Gestão'
-        };
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-        setIsAuthenticated(true);
-        return { success: true };
+      const result = await api.login(email, password);
+      if (!result.success) {
+        return { success: false, message: result.message || 'Credenciais inválidas' };
       }
 
-      if (email === 'user@m74.ao' && password === 'user123') {
-        const userData = {
-          id: '2',
-          email: 'user@m74.ao',
-          name: 'Maria Santos',
-          role: 'user',
-          avatar: '👩',
-          phone: '+244 222 111 111',
-          nif: '0987654321',
-          company: 'M74 Gestão'
-        };
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-        setIsAuthenticated(true);
-        return { success: true };
-      }
-
-      return { success: false, message: 'Email ou senha inválidos' };
+      const { user: userData, token: authToken } = result.data;
+      localStorage.setItem('auth_token', authToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      setToken(authToken);
+      setIsAuthenticated(true);
+      return { success: true, user: userData };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: error.message || 'Erro ao autenticar' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (values) => {
+    setIsLoading(true);
+    try {
+      const result = await api.register(values);
+      if (!result.success) {
+        return { success: false, message: result.message || 'Erro ao registrar usuário' };
+      }
+
+      const { user: userData, token: authToken } = result.data;
+      localStorage.setItem('auth_token', authToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      setToken(authToken);
+      setIsAuthenticated(true);
+      return { success: true, user: userData };
+    } catch (error) {
+      return { success: false, message: error.message || 'Erro ao registrar usuário' };
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = () => {
+    localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
     setUser(null);
+    setToken(null);
     setIsAuthenticated(false);
   };
 
-  const updateUser = (updatedData) => {
-    const newUser = { ...user, ...updatedData };
-    localStorage.setItem('user', JSON.stringify(newUser));
-    setUser(newUser);
+  const updateUser = async (updatedData) => {
+    setIsLoading(true);
+    try {
+      const result = await api.updateProfile(token, updatedData);
+      if (result.success) {
+        setUser(result.data);
+        localStorage.setItem('user', JSON.stringify(result.data));
+        return { success: true, user: result.data };
+      }
+      return { success: false, message: result.message || 'Erro ao atualizar perfil.' };
+    } catch (error) {
+      return { success: false, message: error.message || 'Erro ao atualizar perfil.' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const changePassword = async (passwordData) => {
+    setIsLoading(true);
+    try {
+      const result = await api.changePassword(token, passwordData);
+      if (result.success) {
+        return { success: true, message: result.message || 'Senha atualizada com sucesso.' };
+      }
+      return { success: false, message: result.message || 'Erro ao alterar senha.' };
+    } catch (error) {
+      return { success: false, message: error.message || 'Erro ao alterar senha.' };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <AuthContext.Provider value={{
       user,
+      token,
       isLoading,
       isAuthenticated,
       login,
+      register,
       logout,
-      updateUser
+      updateUser,
+      changePassword
     }}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth deve ser usado dentro de AuthProvider');
-  }
-  return context;
 }

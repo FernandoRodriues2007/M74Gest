@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { BarChart3, Package, DollarSign, Users, LogOut, Settings, User } from 'lucide-react';
 
 function Home() {

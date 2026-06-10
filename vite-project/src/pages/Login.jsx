@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { validations, getErrorMessage } from '../utils/validations';
 
 function Login() {
@@ -58,14 +58,15 @@ function Login() {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      navigate('/');
+      const nextPath = result.user?.role === 'admin' ? '/admin' : '/dashboard';
+      navigate(nextPath);
     } else {
       setServerError(result.message || 'Erro ao fazer login');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-slate-800 to-slate-900 flex items-center justify-center p-4">
       {/* Background decorativo */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"></div>
@@ -84,7 +85,7 @@ function Login() {
           {/* Erro do servidor */}
           {serverError && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
               <p className="text-sm text-red-700">{serverError}</p>
             </div>
           )}
@@ -146,7 +147,7 @@ function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-linear-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>

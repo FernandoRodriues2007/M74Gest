@@ -1,19 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Mail, Phone } from 'lucide-react';
-import { validations, getErrorMessage } from '../utils/validations';
+import { useAuth } from '../contexts/useAuth';
+import { api } from '../services/api';
+import { validations } from '../utils/validations';
 
 function Clientes() {
+  const { user, token } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [errors, setErrors] = useState({});
-
-  const [clientes, setClientes] = useState([
-    { id: 1, nome: 'João Silva', email: 'joao@email.com', telefone: '+244 222 000 001', nif: '1234567890', cidade: 'Luanda', status: 'Ativo' },
-    { id: 2, nome: 'Maria Santos', email: 'maria@email.com', telefone: '+244 222 000 002', nif: '0987654321', cidade: 'Benguela', status: 'Ativo' },
-    { id: 3, nome: 'Pedro Costa', email: 'pedro@email.com', telefone: '+244 222 000 003', nif: '1122334455', cidade: 'Luanda', status: 'Inativo' },
-  ]);
-
+  const [clientes, setClientes] = useState([]);
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -22,6 +19,29 @@ function Clientes() {
     cidade: '',
     status: 'Ativo'
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const canDelete = user?.role === 'admin';
+
+  useEffect(() => {
+    if (token) {
+      loadClientes();
+    }
+  }, [token]);
+
+  const loadClientes = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await api.getClientes(token);
+      setClientes(response.data);
+    } catch (err) {
+      setError(err.message || 'Não foi possível carregar os clientes');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -66,24 +86,38 @@ function Clientes() {
     setShowModal(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) return;
 
-    if (editingId) {
-      setClientes(clientes.map(c => c.id === editingId ? { ...formData, id: editingId } : c));
-    } else {
-      setClientes([...clientes, { ...formData, id: Date.now() }]);
+    try {
+      if (editingId) {
+        await api.updateCliente(token, editingId, formData);
+      } else {
+        await api.addCliente(token, formData);
+      }
+      await loadClientes();
+      setShowModal(false);
+    } catch (err) {
+      alert(err.message || 'Erro ao salvar cliente');
     }
-    setShowModal(false);
   };
 
-  const handleDeleteCliente = (id) => {
+  const handleDeleteCliente = async (id) => {
+    if (!canDelete) {
+      alert('Apenas administradores podem deletar clientes.');
+      return;
+    }
     if (confirm('Tem certeza que deseja deletar este cliente?')) {
-      setClientes(clientes.filter(c => c.id !== id));
+      try {
+        await api.deleteCliente(token, id);
+        await loadClientes();
+      } catch (err) {
+        alert(err.message || 'Erro ao deletar cliente');
+      }
     }
   };
 
-  const clientesFiltrados = clientes.filter(c =>
+  const clientesFiltrados = clientes.filter((c) =>
     c.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.telefone.includes(searchTerm)
@@ -91,7 +125,6 @@ function Clientes() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -111,7 +144,6 @@ function Clientes() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Barra de Pesquisa */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <div className="relative">
             <input
@@ -123,21 +155,27 @@ function Clientes() {
             />
             <Search className="absolute right-3 top-2.5 w-5 h-5 text-slate-400" />
           </div>
+          {!canDelete && (
+            <p className="mt-3 text-sm text-slate-500">Apenas administradores podem remover clientes.</p>
+          )}
         </div>
 
-        {/* Grid de Clientes */}
+        {error && (
+          <div className="bg-red-50 text-red-700 border border-red-200 rounded-lg p-4 mb-6">
+            {error}
+          </div>
+        )}
+
         {clientesFiltrados.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {clientesFiltrados.map(cliente => (
+            {clientesFiltrados.map((cliente) => (
               <div key={cliente.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6 border border-slate-200">
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-xl">
                     {cliente.nome.charAt(0)}
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    cliente.status === 'Ativo'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
+                    cliente.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
                     {cliente.status}
                   </span>
@@ -181,12 +219,11 @@ function Clientes() {
           </div>
         ) : (
           <div className="text-center py-12 bg-white rounded-lg">
-            <p className="text-slate-500">Nenhum cliente encontrado</p>
+            <p className="text-slate-500">{loading ? 'Carregando clientes...' : 'Nenhum cliente encontrado'}</p>
           </div>
         )}
       </main>
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -200,7 +237,6 @@ function Clientes() {
             </div>
 
             <div className="p-6 space-y-4">
-              {/* Nome */}
               <div>
                 <input
                   type="text"
@@ -214,7 +250,6 @@ function Clientes() {
                 {errors.nome && <p className="text-sm text-red-600 mt-1">{errors.nome}</p>}
               </div>
 
-              {/* Email */}
               <div>
                 <input
                   type="email"
@@ -228,7 +263,6 @@ function Clientes() {
                 {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
               </div>
 
-              {/* Telefone */}
               <div>
                 <input
                   type="tel"
@@ -242,7 +276,6 @@ function Clientes() {
                 {errors.telefone && <p className="text-sm text-red-600 mt-1">{errors.telefone}</p>}
               </div>
 
-              {/* NIF */}
               <div>
                 <input
                   type="text"
@@ -256,7 +289,6 @@ function Clientes() {
                 {errors.nif && <p className="text-sm text-red-600 mt-1">{errors.nif}</p>}
               </div>
 
-              {/* Cidade */}
               <input
                 type="text"
                 placeholder="Cidade"

@@ -1,81 +1,130 @@
-import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, ChevronLeft, Filter } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { useAuth } from '../contexts/useAuth';
+import { api } from '../services/api';
 
 function Produtos() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [editingId, setEditingId] = useState(null);
-
-  const [produtos, setProdutos] = useState([
-    { id: 1, nome: 'Laptop Dell XPS', categoria: 'Eletrônicos', preco: 15000, quantidade: 5, status: 'Ativo' },
-    { id: 2, nome: 'Mouse Logitech', categoria: 'Acessórios', preco: 2500, quantidade: 45, status: 'Ativo' },
-    { id: 3, nome: 'Teclado Mecânico', categoria: 'Acessórios', preco: 8000, quantidade: 12, status: 'Baixo' },
-    { id: 4, nome: 'Monitor LG 27"', categoria: 'Periféricos', preco: 12000, quantidade: 3, status: 'Crítico' },
-  ]);
-
-  const [formData, setFormData] = useState({
-    nome: '',
-    categoria: '',
-    preco: '',
-    quantidade: '',
-    status: 'Ativo'
-  });
+  const [produtos, setProdutos] = useState([]);
+  const [formData, setFormData] = useState({ nome: '', categoria: '', preco: '', quantidade: '', status: 'Ativo' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const categorias = ['Eletrônicos', 'Acessórios', 'Periféricos', 'Software', 'Serviços'];
+  const canManage = user?.role === 'admin';
+
+  useEffect(() => {
+    if (token) {
+      loadProdutos();
+    }
+  }, [token]);
+
+  const loadProdutos = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await api.getProdutos(token);
+      setProdutos(response.data);
+    } catch (err) {
+      setError(err.message || 'Não foi possível carregar os produtos');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddProduto = () => {
+    if (!canManage) {
+      alert('Apenas administradores podem adicionar produtos.');
+      return;
+    }
     setEditingId(null);
     setFormData({ nome: '', categoria: '', preco: '', quantidade: '', status: 'Ativo' });
     setShowModal(true);
   };
 
   const handleEditProduto = (produto) => {
+    if (!canManage) {
+      alert('Apenas administradores podem editar produtos.');
+      return;
+    }
     setEditingId(produto.id);
-    setFormData(produto);
+    setFormData({
+      nome: produto.nome,
+      categoria: produto.categoria,
+      preco: produto.preco,
+      quantidade: produto.quantidade,
+      status: produto.status
+    });
     setShowModal(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.nome || !formData.categoria || !formData.preco || !formData.quantidade) {
       alert('Preencha todos os campos');
       return;
     }
 
-    if (editingId) {
-      setProdutos(produtos.map(p => p.id === editingId ? { ...formData, id: editingId } : p));
-    } else {
-      setProdutos([...produtos, { ...formData, id: Date.now() }]);
+    const payload = {
+      nome: formData.nome,
+      categoria: formData.categoria,
+      preco: Number(formData.preco),
+      quantidade: Number(formData.quantidade),
+      status: formData.status
+    };
+
+    try {
+      if (editingId) {
+        await api.updateProduto(token, editingId, payload);
+      } else {
+        await api.addProduto(token, payload);
+      }
+      await loadProdutos();
+      setShowModal(false);
+    } catch (err) {
+      alert(err.message || 'Erro ao salvar produto');
     }
-    setShowModal(false);
   };
 
-  const handleDeleteProduto = (id) => {
+  const handleDeleteProduto = async (id) => {
+    if (!canManage) {
+      alert('Apenas administradores podem remover produtos.');
+      return;
+    }
     if (confirm('Tem certeza que deseja deletar este produto?')) {
-      setProdutos(produtos.filter(p => p.id !== id));
+      try {
+        await api.deleteProduto(token, id);
+        await loadProdutos();
+      } catch (err) {
+        alert(err.message || 'Erro ao deletar produto');
+      }
     }
   };
 
-  const produtosFiltrados = produtos.filter(p => 
-    (p.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     p.categoria.toLowerCase().includes(searchTerm.toLowerCase())) &&
+  const produtosFiltrados = produtos.filter((p) =>
+    (p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.categoria.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (!filterCategory || p.categoria === filterCategory)
   );
 
   const getStatusColor = (status) => {
-    switch(status) {
-      case 'Ativo': return 'bg-green-100 text-green-800';
-      case 'Baixo': return 'bg-yellow-100 text-yellow-800';
-      case 'Crítico': return 'bg-red-100 text-red-800';
-      default: return 'bg-slate-100 text-slate-800';
+    switch (status) {
+      case 'Ativo':
+        return 'bg-green-100 text-green-800';
+      case 'Baixo':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Crítico':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-slate-100 text-slate-800';
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -86,7 +135,8 @@ function Produtos() {
           </div>
           <button
             onClick={handleAddProduto}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            disabled={!canManage}
           >
             <Plus className="w-5 h-5" />
             Novo Produto
@@ -95,7 +145,6 @@ function Produtos() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Filtros */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6 space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -114,14 +163,24 @@ function Produtos() {
               className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Todas as Categorias</option>
-              {categorias.map(cat => (
+              {categorias.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
+          {!canManage && (
+            <div className="text-sm text-slate-500">
+              Você pode visualizar produtos. Apenas administradores podem criar, editar e deletar itens.
+            </div>
+          )}
         </div>
 
-        {/* Tabela */}
+        {error && (
+          <div className="bg-red-50 text-red-700 border border-red-200 rounded-lg p-4 mb-6">
+            {error}
+          </div>
+        )}
+
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <table className="w-full">
             <thead className="bg-slate-800 text-white">
@@ -136,11 +195,11 @@ function Produtos() {
             </thead>
             <tbody>
               {produtosFiltrados.length > 0 ? (
-                produtosFiltrados.map(produto => (
+                produtosFiltrados.map((produto) => (
                   <tr key={produto.id} className="border-b border-slate-200 hover:bg-slate-50 transition">
                     <td className="px-6 py-4 font-semibold text-slate-800">{produto.nome}</td>
                     <td className="px-6 py-4 text-slate-600">{produto.categoria}</td>
-                    <td className="px-6 py-4 text-right font-bold text-slate-800">{produto.preco.toLocaleString('pt-AO')} kz</td>
+                    <td className="px-6 py-4 text-right font-bold text-slate-800">{Number(produto.preco).toLocaleString('pt-AO')} kz</td>
                     <td className="px-6 py-4 text-center text-slate-800">{produto.quantidade}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(produto.status)}`}>
@@ -151,12 +210,14 @@ function Produtos() {
                       <button
                         onClick={() => handleEditProduto(produto)}
                         className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition"
+                        disabled={!canManage}
                       >
                         <Edit className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleDeleteProduto(produto.id)}
                         className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition"
+                        disabled={!canManage}
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -166,7 +227,7 @@ function Produtos() {
               ) : (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
-                    Nenhum produto encontrado
+                    {loading ? 'Carregando produtos...' : 'Nenhum produto encontrado'}
                   </td>
                 </tr>
               )}
@@ -175,7 +236,6 @@ function Produtos() {
         </div>
       </main>
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full">
@@ -202,7 +262,7 @@ function Produtos() {
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Selecione Categoria</option>
-                {categorias.map(cat => (
+                {categorias.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
@@ -210,14 +270,14 @@ function Produtos() {
                 type="number"
                 placeholder="Preço"
                 value={formData.preco}
-                onChange={(e) => setFormData({ ...formData, preco: parseFloat(e.target.value) })}
+                onChange={(e) => setFormData({ ...formData, preco: e.target.value })}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="number"
                 placeholder="Quantidade"
                 value={formData.quantidade}
-                onChange={(e) => setFormData({ ...formData, quantidade: parseInt(e.target.value) })}
+                onChange={(e) => setFormData({ ...formData, quantidade: e.target.value })}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
