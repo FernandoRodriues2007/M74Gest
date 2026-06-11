@@ -27,7 +27,7 @@ export function PrivateRoute({ children, adminOnly = false }) {
 }
 
 export function PublicRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -41,7 +41,8 @@ export function PublicRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    const nextPath = user?.role === 'admin' ? '/admin' : '/dashboard';
+    return <Navigate to={nextPath} replace />;
   }
 
   return children;

@@ -11,8 +11,8 @@ function Login() {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [formData, setFormData] = useState({
-    email: 'admin@m74.ao',
-    password: 'admin123'
+    email: '',
+    password: ''
   });
 
   const validateForm = () => {
@@ -26,8 +26,6 @@ function Login() {
 
     if (validations.isEmpty(formData.password)) {
       newErrors.password = getErrorMessage('password', 'required');
-    } else if (!validations.password(formData.password)) {
-      newErrors.password = getErrorMessage('password', 'invalid');
     }
 
     setErrors(newErrors);
@@ -162,10 +160,9 @@ function Login() {
 
           {/* Demo credentials */}
           <div className="bg-blue-50 rounded-lg p-4 text-sm space-y-2 border border-blue-200">
-            <p className="font-semibold text-slate-700">Credenciais de Demo:</p>
+            <p className="font-semibold text-slate-700">Credenciais de Acesso:</p>
             <div className="space-y-1 text-slate-600">
-              <p><span className="font-semibold">Admin:</span> admin@m74.ao / admin123</p>
-              <p><span className="font-semibold">User:</span> user@m74.ao / user123</p>
+              <p><span className="font-semibold">Admin:</span> admin@m74.ao / Admin123!</p>
             </div>
           </div>
         </div>

@@ -80,14 +80,14 @@ function Login({ onBack }) {
                         <Input 
                             id="email" 
                             type="email" 
-                            placeholder="Digite seu email" 
+                            placeholder="Email:" 
                             function={(e) => setEmail(e.target.value)}
                             value={email}
                         />
                         <Input 
                             id="password" 
                             type="password" 
-                            placeholder="Digite sua senha" 
+                            placeholder="Senha:" 
                             function={(e) => setPassword(e.target.value)}
                             value={password}
                         />

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const dataDir = path.join(__dirname, '../data');
 if (!fs.existsSync(dataDir)) {
@@ -67,9 +67,18 @@ db.prepare(`
   )
 `).run();
 
-const adminEmail = 'adimin@gmail.com';
-const adminPassword = 'Mateus74**';
+const adminEmail = 'admin@m74.ao';
+const adminPassword = 'Admin123!';
 const adminName = 'Rodrigues Mateus';
+
+// Remove o admin antigo com email errado se existir
+const oldAdminEmail = 'adimin@gmail.com';
+const oldAdmin = db.prepare('SELECT id FROM users WHERE email = ?').get(oldAdminEmail);
+if (oldAdmin) {
+  db.prepare('DELETE FROM users WHERE email = ?').run(oldAdminEmail);
+  console.log('Admin antigo removido:', oldAdminEmail);
+}
+
 const adminExists = db.prepare('SELECT id, role FROM users WHERE email = ?').get(adminEmail);
 if (!adminExists) {
   const passwordHash = bcrypt.hashSync(adminPassword, 10);

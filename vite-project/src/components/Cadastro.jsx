@@ -14,13 +14,15 @@ function Select({ value, onChange }) {
         <div className="mb-6">
             <select
                 id="role"
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
-                onChange={onChange}
+                name="role"
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 bg-slate-700 text-white"
                 value={value}
+                onChange={onChange}
             >
                 <option value="">Selecione uma opção</option>
                 <option value="user">Utilizador Padrão</option>
                 <option value="admin">Administrador</option>
+                <option value="client">Cliente</option>
             </select>
         </div>
     );
@@ -94,18 +96,23 @@ function Cadastro({ onBack }) {
             return;
         }
 
-        // Ensure role is always set to 'user' if not admin
+        // Backend sempre cria com role 'user' independente do que é enviado
         const submitData = {
-            ...formData,
-            role: formData.role === 'admin' ? 'admin' : 'user'
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role
         };
 
         const result = await register(submitData);
         if (result.success) {
             if (onBack) {
+                // Veio como modal/componente embutido, volta para Login
                 setPage('Login');
             } else {
-                navigate('/login');
+                // Registo bem sucedido — redireciona para o dashboard
+                const nextPath = result.user?.role === 'admin' ? '/admin' : '/dashboard';
+                navigate(nextPath);
             }
         } else {
             setServerError(result.message || 'Erro ao registrar');
@@ -143,7 +150,7 @@ function Cadastro({ onBack }) {
                             type="text"
                             placeholder=" Nome:"
                             value={formData.name}
-                            onChange={handleChange}
+                            function={handleChange}
                         />
                         {errors.name && <p className="text-sm text-red-400">{errors.name}</p>}
 
@@ -154,7 +161,7 @@ function Cadastro({ onBack }) {
                             type="email"
                             placeholder="Email:"
                             value={formData.email}
-                            onChange={handleChange}
+                            function={handleChange}
                         />
                         {errors.email && <p className="text-sm text-red-400">{errors.email}</p>}
 
@@ -165,16 +172,14 @@ function Cadastro({ onBack }) {
                             type="password"
                             placeholder="Senha:"
                             value={formData.password}
-                            onChange={handleChange}
+                            function={handleChange}
                         />
                         {errors.password && <p className="text-sm text-red-400">{errors.password}</p>}
 
                         
                         <Select 
-                            value={formData.role} 
-                            onChange={(e) => {
-                                handleChange({ target: { name: 'role', value: e.target.value } });
-                            }} 
+                            value={formData.role}
+                            onChange={handleChange}
                         />
                         {errors.role && <p className="text-sm text-red-400">{errors.role}</p>}
 
