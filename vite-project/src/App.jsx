@@ -5,7 +5,7 @@ import { PrivateRoute, PublicRoute } from './components/ProtectedRoute';
 // Páginas
 import LandingPage from './components/Home';
 import Cadastro from './components/Cadastro';
-import Login from './pages/Login';
+import Login from './components/Login';
 import Home from './pages/Home';
 import Produtos from './pages/Produtos';
 import Clientes from './pages/Clientes';

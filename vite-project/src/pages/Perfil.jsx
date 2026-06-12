@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
-import { Save, Lock, ChevronLeft, Mail, Phone, FileText, MapPin, Eye, EyeOff } from 'lucide-react';
+import { Save, Lock, ChevronLeft, Mail, Phone, FileText, Eye, EyeOff } from 'lucide-react';
 import { validations } from '../utils/validations';
+import { getInitials } from '../utils/avatar';
 
-function Perfil() {
+function Perfil({ embedded = false }) {
   const navigate = useNavigate();
   const { user, updateUser, changePassword, logout } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -109,32 +110,33 @@ function Perfil() {
   const handleLogout = () => {
     if (confirm('Tem certeza que deseja sair?')) {
       logout();
-      navigate('/login');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 hover:bg-slate-100 rounded-lg transition"
-          >
-            <ChevronLeft className="w-6 h-6 text-slate-600" />
-          </button>
-          <h1 className="text-2xl font-bold text-slate-800">Meu Perfil</h1>
+    <div className={embedded ? 'bg-slate-100' : 'min-h-screen bg-slate-100'}>
+      {/* Header — só aparece quando não está embutido no layout */}
+      {!embedded && (
+        <div className="bg-white shadow-sm sticky top-0 z-40">
+          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
+            <button
+              onClick={() => navigate('/')}
+              className="p-2 hover:bg-slate-100 rounded-lg transition"
+            >
+              <ChevronLeft className="w-6 h-6 text-slate-600" />
+            </button>
+            <h1 className="text-2xl font-bold text-slate-800">Meu Perfil</h1>
+          </div>
         </div>
-      </div>
+      )}
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Card Principal */}
         <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
           <div className="flex flex-col md:flex-row items-start md:items-end gap-6 mb-8 pb-8 border-b border-slate-200">
             {/* Avatar */}
-<div className="w-24 h-24 rounded-full bg-linear-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center text-5xl">
-              {user?.avatar}
+<div className="w-24 h-24 rounded-full bg-linear-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center text-3xl font-bold">
+              {getInitials(user?.name)}
             </div>
 
             <div className="flex-1">

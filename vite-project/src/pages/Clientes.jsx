@@ -3,6 +3,7 @@ import { Plus, Search, Edit, Trash2, Mail, Phone } from 'lucide-react';
 import { useAuth } from '../contexts/useAuth';
 import { api } from '../services/api';
 import { validations } from '../utils/validations';
+import { getInitials } from '../utils/avatar';
 
 function Clientes() {
   const { user, token } = useAuth();
@@ -171,8 +172,8 @@ function Clientes() {
             {clientesFiltrados.map((cliente) => (
               <div key={cliente.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6 border border-slate-200">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-xl">
-                    {cliente.nome.charAt(0)}
+                  <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">
+                    {getInitials(cliente.nome)}
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                     cliente.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'

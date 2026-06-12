@@ -24,7 +24,7 @@ export function Toast({ type = 'info', message, onClose }) {
 
   return (
     <div className={`fixed top-4 right-4 max-w-sm border rounded-lg p-4 shadow-lg flex items-start gap-3 z-50 ${bgColor}`}>
-      <Icon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${textColor}`} />
+      <Icon className={`w-5 h-5 mt-0.5 shrink-0 ${textColor}`} />
       <p className={`text-sm font-semibold ${textColor} flex-1`}>{message}</p>
       <button onClick={onClose} className={`p-1 hover:bg-white/50 rounded transition`}>
         <X className="w-4 h-4" />

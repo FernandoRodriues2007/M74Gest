@@ -27,6 +27,17 @@ app.use(
 );
 
 app.use(express.json());
+
+// Rota de verificação — abre direto no browser
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'online',
+    app: 'M74 Gestão',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api/auth', authRouter);
 app.use('/api/produtos', produtosRouter);
 app.use('/api/clientes', clientesRouter);

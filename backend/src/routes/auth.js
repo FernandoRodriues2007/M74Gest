@@ -15,49 +15,63 @@ function sanitizeUser(user) {
 }
 
 router.post('/register', async (req, res) => {
-  const { name, email, password, phone, nif, company } = req.body;
+  try {
+    const { name, email, password, phone, nif, company, role } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ success: false, message: 'Nome, email e senha são obrigatórios.' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Nome, email e senha são obrigatórios.' });
+    }
+
+    const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: 'Já existe um usuário com esse email.' });
+    }
+
+    // Apenas 'client' e 'user' (funcionário) são permitidos via registo
+    const allowedRoles = ['client', 'user'];
+    const safeRole = allowedRoles.includes(role) ? role : 'user';
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const insert = db.prepare(
+      'INSERT INTO users (name, email, password_hash, role, phone, nif, company) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    );
+    const result = insert.run(name, email, passwordHash, safeRole, phone || '', nif || '', company || '');
+    const user = db.prepare('SELECT id, name, email, role, phone, nif, company FROM users WHERE id = ?').get(result.lastInsertRowid);
+
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+
+    res.status(201).json({ success: true, data: { user, token } });
+  } catch (err) {
+    console.error('[REGISTER ERROR]', err);
+    res.status(500).json({ success: false, message: 'Erro interno ao registrar: ' + err.message });
   }
-
-  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-  if (existingUser) {
-    return res.status(409).json({ success: false, message: 'Já existe um usuário com esse email.' });
-  }
-
-  const passwordHash = await bcrypt.hash(password, 10);
-  const insert = db.prepare(
-    'INSERT INTO users (name, email, password_hash, role, phone, nif, company) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  );
-  const result = insert.run(name, email, passwordHash, 'user', phone || '', nif || '', company || '');
-  const user = db.prepare('SELECT id, name, email, role, phone, nif, company FROM users WHERE id = ?').get(result.lastInsertRowid);
-
-  const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-
-  res.status(201).json({ success: true, data: { user, token } });
 });
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios.' });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios.' });
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Credenciais inválidas.' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Credenciais inválidas.' });
+    }
+
+    const safeUser = sanitizeUser(user);
+    const token = jwt.sign({ id: safeUser.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+    res.json({ success: true, data: { user: safeUser, token } });
+  } catch (err) {
+    console.error('[LOGIN ERROR]', err);
+    res.status(500).json({ success: false, message: 'Erro interno ao autenticar: ' + err.message });
   }
-
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-  if (!user) {
-    return res.status(401).json({ success: false, message: 'Credenciais inválidas.' });
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password_hash);
-  if (!isMatch) {
-    return res.status(401).json({ success: false, message: 'Credenciais inválidas.' });
-  }
-
-  const safeUser = sanitizeUser(user);
-  const token = jwt.sign({ id: safeUser.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-  res.json({ success: true, data: { user: safeUser, token } });
 });
 
 router.get('/me', authenticate, (req, res) => {

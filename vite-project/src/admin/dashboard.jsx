@@ -1,22 +1,20 @@
 import { useState } from "react";
 import Infouser from "../components/infoUser";
-import { UserCircle, Package, DollarSign, Settings, BarChart3 } from "lucide-react";
+import { Package, DollarSign, Settings, BarChart3 } from "lucide-react";
 import Title from "../components/Title";
 import DashboardContent from "./DashboardContent";
 import EstoqueContent from "./EstoqueContent";
 import FaturacaoContent from "./FaturacaoContent";
 import ConfiguracaoContent from "./ConfiguracaoContent";
 import { useAuth } from "../contexts/useAuth";
-import { useNavigate } from "react-router-dom";
+import { getInitials } from "../utils/avatar";
 
 function Dash() {
     const [activeTab, setActiveTab] = useState('dashboard');
     const { user, logout } = useAuth();
-    const navigate = useNavigate();
 
     const handleLogout = () => {
         logout();
-        navigate('/login');
     };
 
     return (
@@ -86,12 +84,14 @@ function Dash() {
                         activeTab === 'estoque' ? 'Estoque' :
                         activeTab === 'faturacao' ? 'Faturação' : 'Configuração'
                     } />
-                    <div className="flex space-x-8 items-center">
+                    <div className="flex space-x-4 items-center">
                         <Infouser
                             Nome={user?.name || 'Utilizador'}
                             user={user?.role === 'admin' ? 'Administrador' : 'Utilizador'}
                         />
-                        <UserCircle className="w-8 h-8 text-slate-800" />
+                        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
+                            {getInitials(user?.name)}
+                        </div>
                     </div>
                 </header>
                 <hr className="border-slate-800" />

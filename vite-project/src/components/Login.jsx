@@ -1,12 +1,10 @@
 import "../assets/style/Login.css";
-import { UserCircle, ArrowLeft, AlertCircle } from "lucide-react";
-import Infodoformulario from "./Infodoformulario";
+import { Mail, Lock, AlertCircle, Send, KeyIcon } from "lucide-react";
 import Button from "./Button";
-import { useState } from "react";
+import Input from "./Input";
 import Cadastro from "./Cadastro";
-import Input from "./Input"
-import Dash from "./dashboard"; 
-import DashAdmin from "../admin/dashboard";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 
 function Login({ onBack }) {
@@ -14,29 +12,18 @@ function Login({ onBack }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const { login: authLogin, isLoading, isAuthenticated, user } = useAuth();
+    const { login: authLogin, isLoading } = useAuth();
+    const navigate = useNavigate();
 
+    // Quando usado como componente embutido (com onBack), mostra Cadastro
     if (page === 'Cadastro') {
         return <Cadastro onBack={() => setPage('Login')} />;
-    }
-    if(page === 'dashboard'){
-        return <Dash/>
-    }
-    if(page === 'admin-dashboard'){
-        return <DashAdmin/>
-    }
-
-    if (isAuthenticated && user) {
-        if (user.role === 'admin') {
-            return <DashAdmin/>;
-        }
-        return <Dash/>;
     }
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError("");
-        
+
         if (!email || !password) {
             setError("Email e senha são obrigatórios");
             return;
@@ -44,50 +31,50 @@ function Login({ onBack }) {
 
         const result = await authLogin(email, password);
         if (result.success) {
-            if (result.user.role === 'admin') {
-                setPage('admin-dashboard');
-            } else {
-                setPage('dashboard');
-            }
+            const dest = result.user.role === 'admin' ? '/admin' : '/dashboard';
+            navigate(dest, { replace: true });
         } else {
             setError(result.message || 'Erro ao fazer login');
         }
-    }
+    };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-slate-800 " animation="animate-fadeInUp">
-            <div className="grid grid-cols-1 md:grid-cols-2 text-center bg-slate-800 text-white md:p-14">
+        <div className="flex items-center justify-center h-screen bg-slate-800">
+            <div className="grid grid-cols-1  text-center bg-slate-800  md:p-14 w-full max-w-5xl">
 
 
-                <Infodoformulario Title="Bem Vindo de Volta" Nome="Cadastrar" Function={() => setPage('Cadastro')} Texto="Para continuar, faça login com suas credenciais." />
 
-
-                <div className=" p-8 rounded-lg  w-full max-w-md ">
-                    <h2 className="text-2xl font-bold mb-6 text-center md:hidden">Bem Vindo de Volta</h2>
+                <div className="p-8 rounded-lg w-full max-w-md mx-auto">
 
                     {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-3 text-left mb-4 text-red-700 bg-opacity-20 mb-6">
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-3 text-left mb-4 text-red-700 bg-opacity-20">
                             <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                             <p className="text-sm">{error}</p>
                         </div>
                     )}
 
-                    <form onSubmit={handleLogin}>
-                        <div className="mb-6">
-                            <UserCircle className="h-14 w-14 text-white mx-auto mb-4" />
-                        </div>
+                    <form onSubmit={handleLogin} className="bg-white  backdrop-blur-3xl rounded-lg p-6">
 
-                        <Input 
-                            id="email" 
-                            type="email" 
-                            placeholder="Email:" 
+                        <h1 className="text-3xl font-bold text-slate-800 text-center mb-8">M74</h1>
+                        <h2 className="text-2xl text-center mb-4 text-slate-800 font-bold">Bem Vindo de Volta</h2>
+                        <p className="text-slate-500 mb-7">Use as suas credenciais para aceder a M74</p>
+
+
+                        <Input
+                            Icon={Mail}
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="Email:"
                             function={(e) => setEmail(e.target.value)}
                             value={email}
                         />
-                        <Input 
-                            id="password" 
-                            type="password" 
-                            placeholder="Senha:" 
+                        <Input
+                            Icon={Lock}
+                            id="password"
+                            name="password"
+                            type="password"
+                            placeholder="Senha:"
                             function={(e) => setPassword(e.target.value)}
                             value={password}
                         />
@@ -95,16 +82,29 @@ function Login({ onBack }) {
                         <div className="flex justify-center">
                             <Button texto={isLoading ? 'Autenticando...' : 'Login'} type="submit" />
                         </div>
+                        <hr className="bg-slate-800 w-full mb-5" />
+
+                        <div className=" w-full flex  space-x-2 items-center text-center justify-center">
+                            <p className="">Ainda não tens conta?</p>
+
+                            <button
+                                type="button"
+                                className=" text-slate-800 hover:text-slate-900  transition"
+                                onClick={() => setPage('Cadastro')}
+                            >
+                                
+                                Criar Conta
+                            </button>
+                        </div>
+
+
                     </form>
-                    <button type="button" className="w-24 py-2 rounded-full text-sm mb-4  text-white  hover:bg-slate-700" onClick={onBack}>
-                        <ArrowLeft className="h-4 w-4 inline mr-2" />
-                        Voltar
-                    </button>
+
                 </div>
 
             </div>
-
         </div>
-    )
+    );
 }
+
 export default Login;

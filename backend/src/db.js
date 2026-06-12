@@ -67,36 +67,21 @@ db.prepare(`
   )
 `).run();
 
+// Seed do admin
 const adminEmail = 'admin@m74.ao';
 const adminPassword = 'Admin123!';
 const adminName = 'Rodrigues Mateus';
-
-// Remove o admin antigo com email errado se existir
-const oldAdminEmail = 'adimin@gmail.com';
-const oldAdmin = db.prepare('SELECT id FROM users WHERE email = ?').get(oldAdminEmail);
-if (oldAdmin) {
-  db.prepare('DELETE FROM users WHERE email = ?').run(oldAdminEmail);
-  console.log('Admin antigo removido:', oldAdminEmail);
-}
 
 const adminExists = db.prepare('SELECT id, role FROM users WHERE email = ?').get(adminEmail);
 if (!adminExists) {
   const passwordHash = bcrypt.hashSync(adminPassword, 10);
   db.prepare(
     'INSERT INTO users (name, email, password_hash, role, phone, nif, company) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  ).run(
-    adminName,
-    adminEmail,
-    passwordHash,
-    'admin',
-    '+244 222 000 000',
-    '1234567890',
-    'M74 Gestão'
-  );
+  ).run(adminName, adminEmail, passwordHash, 'admin', '+244 222 000 000', '1234567890', 'M74 Gestão');
   console.log('Admin seed criado:', adminEmail);
 } else if (adminExists.role !== 'admin') {
   db.prepare('UPDATE users SET role = ?, name = ? WHERE id = ?').run('admin', adminName, adminExists.id);
-  console.log('Admin existente atualizado para role admin:', adminEmail);
+  console.log('Admin atualizado para role admin');
 }
 
 module.exports = db;

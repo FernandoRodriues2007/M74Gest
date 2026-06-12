@@ -93,11 +93,12 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    // Limpar tudo do localStorage
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
-    setUser(null);
-    setToken(null);
-    setIsAuthenticated(false);
+    // Forçar reload completo para limpar todo o estado React
+    // Garante que PublicRoute não lê estado antigo
+    window.location.replace('/login');
   };
 
   const updateUser = async (updatedData) => {

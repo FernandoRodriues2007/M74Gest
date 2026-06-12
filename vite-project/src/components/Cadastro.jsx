@@ -1,6 +1,5 @@
 import "../assets/style/cadastro.css";
-import { ArrowLeft, UserPlus, AlertCircle } from "lucide-react";
-import Infodoformulario from "./Infodoformulario";
+import { ArrowLeft, User, Mail, Lock, AlertCircle } from "lucide-react";
 import Button from "./Button";
 import Login from "./Login";
 import Input from "./Input";
@@ -10,7 +9,7 @@ import { useAuth } from "../contexts/useAuth";
 import { validations, getErrorMessage } from "../utils/validations";
 
 function Select({ value, onChange }) {
-    return(
+    return (
         <div className="mb-6">
             <select
                 id="role"
@@ -19,10 +18,9 @@ function Select({ value, onChange }) {
                 value={value}
                 onChange={onChange}
             >
-                <option value="">Selecione uma opção</option>
-                <option value="user">Utilizador Padrão</option>
-                <option value="admin">Administrador</option>
+                <option value="">Selecione o tipo de conta</option>
                 <option value="client">Cliente</option>
+                <option value="user">Funcionário</option>
             </select>
         </div>
     );
@@ -121,18 +119,15 @@ function Cadastro({ onBack }) {
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-slate-800 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 text-center bg-slate-800 text-white md:p-14 gap-6 w-full max-w-6xl rounded-3xl ">
-                <Infodoformulario
-                    Title="Seja Bem Vindo a M74"
-                    Nome="Login"
-                    Function={() => setPage('Login')}
-                    Texto="Já tem uma conta? Faça login agora dando um click no botão á baixo"
-                />
+            <div className="grid grid-cols-1  place-content-center place-items-center text-center   md:p-14 gap-6 w-full max-w-7xl rounded-3xl ">
+               
 
-                <div className="w-full max-w-md p-8 rounded-lg">
+                <div className="w-full max-w-md p-8 rounded-lg bg-white">
                     <div className="mb-6 p-4 flex flex-col items-center justify-center">
-                        <UserPlus className="h-14 w-14 text-white mb-4" />
-                        <h2 className="text-2xl font-bold text-white">Crie sua conta</h2>
+                        <h1 className="text-3xl font-bold text-slate-800">M74</h1>
+                        <p className="text-slate-500 mb-8">Sistema de gestão inteligente</p>
+                        <h2 className="text-2xl  text-slate-800">Crie sua conta</h2>
+                        <p className="text-slate-500 ">Preencha os campos  para criar a sua conta</p>
                     </div>
 
                     {serverError && (
@@ -142,9 +137,10 @@ function Cadastro({ onBack }) {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4 text-left">
-                        
+                    <form onSubmit={handleSubmit} className="space-y-4 text-left bg-white">
+
                         <Input
+                            Icon={User}
                             id="name"
                             name="name"
                             type="text"
@@ -154,8 +150,9 @@ function Cadastro({ onBack }) {
                         />
                         {errors.name && <p className="text-sm text-red-400">{errors.name}</p>}
 
-                        
+
                         <Input
+                            Icon={Mail}
                             id="email"
                             name="email"
                             type="email"
@@ -165,8 +162,9 @@ function Cadastro({ onBack }) {
                         />
                         {errors.email && <p className="text-sm text-red-400">{errors.email}</p>}
 
-                
+
                         <Input
+                            Icon={Lock}
                             id="password"
                             name="password"
                             type="password"
@@ -176,8 +174,8 @@ function Cadastro({ onBack }) {
                         />
                         {errors.password && <p className="text-sm text-red-400">{errors.password}</p>}
 
-                        
-                        <Select 
+
+                        <Select
                             value={formData.role}
                             onChange={handleChange}
                         />
@@ -186,16 +184,23 @@ function Cadastro({ onBack }) {
                         <div className="flex justify-center">
                             <Button texto={isLoading ? 'Registrando...' : 'Registrar'} type="submit" />
                         </div>
+                        
+                        <hr className="bg-slate-800 w-full mb-5" />
+
+                        <div className=" w-full flex  space-x-2 items-center text-center justify-center">
+                            <p className="text-slate-800">Já tens uma conta?</p>
+
+                            <button
+                                type="button"
+                                className=" text-slate-800 hover:text-slate-900  transition"
+                                onClick={ () => setPage('Login')}
+                            >
+                                
+                                Fazer Login
+                            </button>
+                        </div>
                     </form>
 
-                    <button
-                        type="button"
-                        className="w-full py-2 rounded-full text-sm mt-4 text-white border border-slate-700 hover:bg-slate-700 transition"
-                        onClick={onBack ? onBack : () => navigate('/')}
-                    >
-                        <ArrowLeft className="h-4 w-4 inline mr-2" />
-                        Voltar
-                    </button>
                 </div>
             </div>
         </div>

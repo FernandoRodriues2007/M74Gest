@@ -15,14 +15,26 @@ const getAuthHeaders = (token) => {
 const parseResponse = async (response) => {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw payload;
+    // Lançar com a estrutura esperada pelo AuthContext
+    const err = new Error(payload.message || `Erro ${response.status}`);
+    err.data = payload;
+    throw err;
   }
   return payload;
 };
 
 const request = async (path, options = {}) => {
-  const response = await fetch(`${API_CONFIG.baseURL}${path}`, options);
-  return parseResponse(response);
+  try {
+    const response = await fetch(`${API_CONFIG.baseURL}${path}`, options);
+    return parseResponse(response);
+  } catch (err) {
+    // Erro de rede (backend offline, CORS, etc.)
+    if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+      const netErr = new Error('Não foi possível conectar ao servidor. Verifique se o backend está em execução.');
+      throw netErr;
+    }
+    throw err;
+  }
 };
 
 export const api = {
