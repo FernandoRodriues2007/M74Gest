@@ -16,10 +16,11 @@ router.post('/', authenticate, (req, res) => {
   }
 
   const total = Number(quantidade) * Number(preco);
+  const funcionario = req.user.name || req.user.email;
   const stmt = db.prepare(
-    'INSERT INTO vendas (cliente, produto, quantidade, preco, total, data, status) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO vendas (cliente, produto, quantidade, preco, total, data, status, funcionario) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
   );
-  const result = stmt.run(cliente, produto, quantidade, preco, total, data, status || 'Pendente');
+  const result = stmt.run(cliente, produto, quantidade, preco, total, data, status || 'Pendente', funcionario);
   const venda = db.prepare('SELECT * FROM vendas WHERE id = ?').get(result.lastInsertRowid);
   res.status(201).json({ success: true, data: venda });
 });

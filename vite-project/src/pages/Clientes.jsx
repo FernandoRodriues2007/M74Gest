@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Edit, Trash2, Mail, Phone } from 'lucide-react';
 import { useAuth } from '../contexts/useAuth';
 import { api } from '../services/api';
@@ -25,13 +25,7 @@ function Clientes() {
 
   const canDelete = user?.role === 'admin';
 
-  useEffect(() => {
-    if (token) {
-      loadClientes();
-    }
-  }, [token]);
-
-  const loadClientes = async () => {
+  const loadClientes = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -42,7 +36,13 @@ function Clientes() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      loadClientes();
+    }
+  }, [token, loadClientes]);
 
   const validateForm = () => {
     const newErrors = {};

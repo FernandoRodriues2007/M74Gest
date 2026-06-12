@@ -6,12 +6,13 @@ export default function useInView(options){
         const observer = new IntersectionObserver(([entry])=>{
             setInView(entry.isIntersecting);
         },options);
-        if(ref.current){
-            observer.observe(ref.current);
+        const el = ref.current;
+        if(el){
+            observer.observe(el);
         }
         return()=>{
-            if(ref.current){
-                observer.unobserve(ref.current);
+            if(el){
+                observer.unobserve(el);
             }
         }
     },[options]);

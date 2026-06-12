@@ -1,5 +1,5 @@
 import { Trash2, Edit, Plus, Search } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../contexts/useAuth";
 import { api } from "../services/api";
 
@@ -18,11 +18,7 @@ function EstoqueContent() {
 
     const categorias = ['Eletrônicos', 'Acessórios', 'Periféricos', 'Software', 'Serviços'];
 
-    useEffect(() => {
-        if (token) loadProdutos();
-    }, [token]);
-
-    const loadProdutos = async () => {
+    const loadProdutos = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
@@ -33,7 +29,11 @@ function EstoqueContent() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [token]);
+
+    useEffect(() => {
+        if (token) loadProdutos();
+    }, [token, loadProdutos]);
 
     const handleAdd = () => {
         setEditingId(null);
@@ -185,15 +185,15 @@ function EstoqueContent() {
 
             {/* Resumo */}
             <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                <div className="bg-linear-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
                     <p className="text-slate-600 text-sm">Total de Produtos</p>
                     <p className="text-2xl font-bold text-blue-600">{produtosFiltrados.length}</p>
                 </div>
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg">
+                <div className="bg-linear-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg">
                     <p className="text-slate-600 text-sm">Baixo Estoque</p>
                     <p className="text-2xl font-bold text-yellow-600">{produtosFiltrados.filter(p => p.status === 'Baixo').length}</p>
                 </div>
-                <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg">
+                <div className="bg-linear-to-br from-red-50 to-red-100 p-4 rounded-lg">
                     <p className="text-slate-600 text-sm">Estoque Crítico</p>
                     <p className="text-2xl font-bold text-red-600">{produtosFiltrados.filter(p => p.status === 'Crítico').length}</p>
                 </div>

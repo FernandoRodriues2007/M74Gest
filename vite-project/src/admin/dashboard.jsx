@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Infouser from "../components/infoUser";
-import { Package, DollarSign, Settings, BarChart3 } from "lucide-react";
+import { Package, DollarSign, Settings, BarChart3, Menu, X, LogOut } from "lucide-react";
 import Title from "../components/Title";
 import DashboardContent from "./DashboardContent";
 import EstoqueContent from "./EstoqueContent";
@@ -11,94 +11,108 @@ import { getInitials } from "../utils/avatar";
 
 function Dash() {
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const { user, logout } = useAuth();
 
-    const handleLogout = () => {
-        logout();
+    const navItems = [
+        { key: 'dashboard',   label: 'Dashboard',    Icon: BarChart3  },
+        { key: 'estoque',     label: 'Estoque',       Icon: Package    },
+        { key: 'faturacao',   label: 'Faturação',     Icon: DollarSign },
+        { key: 'configuracao',label: 'Configuração',  Icon: Settings   },
+    ];
+
+    const tabTitles = {
+        dashboard:    'Dashboard',
+        estoque:      'Estoque',
+        faturacao:    'Faturação',
+        configuracao: 'Configuração',
     };
 
-    return (
-        <div className="text-center bg-slate-100 grid md:grid-cols-6">
-            <div className="hidden md:block bg-slate-800 space-y-10 p-7">
-                <h1 className="text-start text-3xl text-slate-100 font-bold">M74</h1>
-                <nav className="space-y-8 grid grid-cols-1 text-start">
-                    <button
-                        onClick={() => setActiveTab('dashboard')}
-                        className={`flex gap-4 items-center p-3 rounded-md transition duration-700 ${
-                            activeTab === 'dashboard'
-                                ? 'bg-white text-slate-800 font-bold'
-                                : 'text-white hover:text-slate-800 hover:bg-white'
-                        }`}
-                    >
-                        <BarChart3 className="w-5 h-5" />
-                        Dashboard
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('estoque')}
-                        className={`flex gap-4 items-center p-3 rounded-md transition duration-700 ${
-                            activeTab === 'estoque'
-                                ? 'bg-white text-slate-800 font-bold'
-                                : 'text-white hover:text-slate-800 hover:bg-white'
-                        }`}
-                    >
-                        <Package className="w-5 h-5" />
-                        Estoque
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('faturacao')}
-                        className={`flex gap-4 items-center p-3 rounded-md transition duration-700 ${
-                            activeTab === 'faturacao'
-                                ? 'bg-white text-slate-800 font-bold'
-                                : 'text-white hover:text-slate-800 hover:bg-white'
-                        }`}
-                    >
-                        <DollarSign className="w-5 h-5" />
-                        Faturação
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('configuracao')}
-                        className={`flex gap-4 items-center p-3 rounded-md transition duration-700 ${
-                            activeTab === 'configuracao'
-                                ? 'bg-white text-slate-800 font-bold'
-                                : 'text-white hover:text-slate-800 hover:bg-white'
-                        }`}
-                    >
-                        <Settings className="w-5 h-5" />
-                        Configuração
-                    </button>
+    const NavContent = () => (
+        <>
+            <div className="space-y-8">
+                <h1 className="text-3xl text-slate-100 font-bold">M74</h1>
+                <nav className="space-y-2 grid grid-cols-1 text-start">
+                    {navItems.map(({ key, label, Icon }) => (
+                        <button
+                            key={key}
+                            onClick={() => { setActiveTab(key); setSidebarOpen(false); }}
+                            className={`flex gap-4 items-center p-3 rounded-md transition duration-300 ${
+                                activeTab === key
+                                    ? 'bg-white text-slate-800 font-bold'
+                                    : 'text-white hover:text-slate-800 hover:bg-white'
+                            }`}
+                        >
+                            <Icon className="w-5 h-5" />
+                            {label}
+                        </button>
+                    ))}
                 </nav>
-                <div className="grid align-bottom">
-                    <button
-                        onClick={handleLogout}
-                        className="w-full text-center py-2 px-4 rounded-md text-white border border-slate-600 hover:bg-slate-700 transition duration-300"
-                    >
-                        Sair
-                    </button>
-                </div>
             </div>
+            <button
+                onClick={logout}
+                className="flex items-center gap-2 w-full py-2 px-4 rounded-md text-white border border-slate-600 hover:bg-slate-700 transition duration-300"
+            >
+                <LogOut className="w-4 h-4" />
+                Sair
+            </button>
+        </>
+    );
 
-            <div className="h-screen col-span-5 overflow-y-auto">
-                <header className="flex w-full p-4 justify-between bg-slate-100">
-                    <Title Title={
-                        activeTab === 'dashboard' ? 'Dashboard' :
-                        activeTab === 'estoque' ? 'Estoque' :
-                        activeTab === 'faturacao' ? 'Faturação' : 'Configuração'
-                    } />
-                    <div className="flex space-x-4 items-center">
+    return (
+        <div className="bg-slate-100 min-h-screen flex flex-col md:grid md:grid-cols-6">
+
+            {/* ── Sidebar desktop ── */}
+            <aside className="hidden md:flex flex-col justify-between bg-slate-800 p-7">
+                <NavContent />
+            </aside>
+
+            {/* ── Drawer mobile ── */}
+            {sidebarOpen && (
+                <div className="fixed inset-0 z-50 flex md:hidden">
+                    <div className="w-64 bg-slate-800 p-7 flex flex-col justify-between shadow-2xl">
+                        <NavContent />
+                    </div>
+                    <div className="flex-1 bg-black/50" onClick={() => setSidebarOpen(false)} />
+                </div>
+            )}
+
+            {/* ── Conteúdo principal ── */}
+            <div className="col-span-5 flex flex-col h-screen overflow-hidden">
+
+                {/* Header */}
+                <header className="flex w-full p-4 justify-between items-center bg-white shadow-sm shrink-0">
+                    <div className="flex items-center gap-3">
+                        {/* Hambúrguer mobile */}
+                        <button
+                            className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition"
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
+                            {sidebarOpen
+                                ? <X className="w-5 h-5 text-slate-700" />
+                                : <Menu className="w-5 h-5 text-slate-700" />
+                            }
+                        </button>
+                        <Title Title={tabTitles[activeTab]} />
+                    </div>
+                    <div className="flex items-center gap-3">
                         <Infouser
                             Nome={user?.name || 'Utilizador'}
-                            user={user?.role === 'admin' ? 'Administrador' : 'Utilizador'}
+                            user="Administrador"
                         />
-                        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
                             {getInitials(user?.name)}
                         </div>
                     </div>
                 </header>
-                <hr className="border-slate-800" />
-                <main className="min-h-screen">
-                    {activeTab === 'dashboard' && <DashboardContent />}
-                    {activeTab === 'estoque' && <EstoqueContent />}
-                    {activeTab === 'faturacao' && <FaturacaoContent />}
+
+                <hr className="border-slate-200 shrink-0" />
+
+                {/* Conteúdo com scroll */}
+                <main className="flex-1 overflow-y-auto">
+                    {activeTab === 'dashboard'    && <DashboardContent />}
+                    {activeTab === 'estoque'      && <EstoqueContent />}
+                    {activeTab === 'faturacao'    && <FaturacaoContent />}
                     {activeTab === 'configuracao' && <ConfiguracaoContent />}
                 </main>
             </div>

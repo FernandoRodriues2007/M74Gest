@@ -1,69 +1,28 @@
 import { useState } from 'react';
+import { ShoppingCart, User, LogOut, Menu, X, BarChart3 } from 'lucide-react';
 import { useAuth } from '../contexts/useAuth';
-import { BarChart3, Package, Users, DollarSign, User, Menu, X, LogOut } from 'lucide-react';
 import Title from '../components/Title';
 import Infouser from '../components/infoUser';
-import Produtos from './Produtos';
-import Clientes from './Clientes';
-import Vendas from './Vendas';
-import Perfil from './Perfil';
 import { getInitials } from '../utils/avatar';
+import ClienteCompra from './ClienteCompra';
+import ClienteHistorico from './ClienteHistorico';
+import Perfil from '../pages/Perfil';
 
-function HomeContent({ user }) {
-  return (
-    <section className="p-6 space-y-6">
-      <div className="mb-4">
-        <h2 className="text-3xl font-bold text-slate-800">
-          Bem-vindo, {user?.name?.split(' ')[0]}
-        </h2>
-        <p className="text-slate-500 mt-1">Gerencie a sua loja de forma simples e segura</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-600">
-          <p className="text-slate-600 text-sm font-semibold mb-2">Produtos</p>
-          <p className="text-slate-500 text-sm">Consulte e gira o estoque de produtos</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-600">
-          <p className="text-slate-600 text-sm font-semibold mb-2">Clientes</p>
-          <p className="text-slate-500 text-sm">Consulte e gira os dados de clientes</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-600">
-          <p className="text-slate-600 text-sm font-semibold mb-2">Vendas</p>
-          <p className="text-slate-500 text-sm">Registe e acompanhe as vendas</p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Home() {
-  const [activeTab, setActiveTab] = useState('home');
+function ClienteDashboard() {
+  const [activeTab, setActiveTab] = useState('loja');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
 
-  const handleLogout = () => logout();
-
-  const roleLabel = () => {
-    if (user?.role === 'admin') return 'Administrador';
-    if (user?.role === 'client') return 'Cliente';
-    return 'Funcionário';
-  };
-
   const navItems = [
-    { key: 'home',     label: 'Dashboard', Icon: BarChart3  },
-    { key: 'produtos', label: 'Produtos',  Icon: Package    },
-    { key: 'clientes', label: 'Clientes',  Icon: Users      },
-    { key: 'vendas',   label: 'Vendas',    Icon: DollarSign },
-    { key: 'perfil',   label: 'Perfil',    Icon: User       },
+    { key: 'loja',      label: 'Loja',       Icon: ShoppingCart },
+    { key: 'historico', label: 'Histórico',  Icon: BarChart3    },
+    { key: 'perfil',    label: 'Perfil',     Icon: User         },
   ];
 
   const tabTitles = {
-    home:     'Dashboard',
-    produtos: 'Produtos',
-    clientes: 'Clientes',
-    vendas:   'Vendas',
-    perfil:   'Meu Perfil',
+    loja:      'Loja — Efectuar Compra',
+    historico: 'Histórico de Compras',
+    perfil:    'Meu Perfil',
   };
 
   const NavContent = () => (
@@ -88,8 +47,8 @@ function Home() {
         </nav>
       </div>
       <button
-        onClick={handleLogout}
-        className="flex items-center gap-2 w-full py-2 px-4 rounded-md text-white border border-slate-600 hover:bg-slate-700 transition"
+        onClick={logout}
+        className="flex items-center gap-2 w-full text-center py-2 px-4 rounded-md text-white border border-slate-600 hover:bg-slate-700 transition duration-300"
       >
         <LogOut className="w-4 h-4" />
         Sair
@@ -121,6 +80,7 @@ function Home() {
         {/* Header */}
         <header className="flex w-full p-4 justify-between items-center bg-white shadow-sm shrink-0">
           <div className="flex items-center gap-3">
+            {/* Hambúrguer mobile */}
             <button
               className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition"
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -130,7 +90,7 @@ function Home() {
             <Title Title={tabTitles[activeTab]} />
           </div>
           <div className="flex items-center gap-3">
-            <Infouser Nome={user?.name || 'Utilizador'} user={roleLabel()} />
+            <Infouser Nome={user?.name || 'Cliente'} user="Cliente" />
             <button onClick={() => { setActiveTab('perfil'); setSidebarOpen(false); }}>
               <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold hover:bg-blue-700 transition">
                 {getInitials(user?.name)}
@@ -142,16 +102,14 @@ function Home() {
         <hr className="border-slate-200 shrink-0" />
 
         {/* Conteúdo com scroll */}
-        <main className="flex-1 overflow-y-auto">
-          {activeTab === 'home'     && <HomeContent user={user} />}
-          {activeTab === 'produtos' && <Produtos />}
-          {activeTab === 'clientes' && <Clientes />}
-          {activeTab === 'vendas'   && <Vendas />}
-          {activeTab === 'perfil'   && <Perfil embedded />}
+        <main className="flex-1 overflow-y-auto bg-slate-100">
+          {activeTab === 'loja'      && <ClienteCompra />}
+          {activeTab === 'historico' && <ClienteHistorico />}
+          {activeTab === 'perfil'    && <Perfil embedded />}
         </main>
       </div>
     </div>
   );
 }
 
-export default Home;
+export default ClienteDashboard;

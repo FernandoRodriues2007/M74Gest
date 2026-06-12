@@ -63,9 +63,17 @@ db.prepare(`
     total REAL NOT NULL,
     data TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'Pendente',
+    funcionario TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )
 `).run();
+
+// Adicionar coluna funcionario se ainda não existir (migração)
+try {
+  db.prepare('ALTER TABLE vendas ADD COLUMN funcionario TEXT NOT NULL DEFAULT ""').run();
+} catch {
+  // Coluna já existe, ignorar
+}
 
 // Seed do admin
 const adminEmail = 'admin@m74.ao';

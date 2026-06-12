@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/useAuth';
 import { api } from '../services/api';
@@ -17,13 +17,7 @@ function Produtos() {
   const categorias = ['Eletrônicos', 'Acessórios', 'Periféricos', 'Software', 'Serviços'];
   const canManage = user?.role === 'admin';
 
-  useEffect(() => {
-    if (token) {
-      loadProdutos();
-    }
-  }, [token]);
-
-  const loadProdutos = async () => {
+  const loadProdutos = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -34,7 +28,13 @@ function Produtos() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      loadProdutos();
+    }
+  }, [token, loadProdutos]);
 
   const handleAddProduto = () => {
     if (!canManage) {
