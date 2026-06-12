@@ -14,7 +14,7 @@ function HomeContent({ user }) {
     <section className="p-6 space-y-6">
       <div className="mb-4">
         <h2 className="text-3xl font-bold text-slate-800">
-          Bem-vindo, {user?.name?.split(' ')[0]}! 👋
+          Bem-vindo, {user?.name?.split(' ')[0]}
         </h2>
         <p className="text-slate-500 mt-1">Gerencie a sua loja de forma simples e segura</p>
       </div>
