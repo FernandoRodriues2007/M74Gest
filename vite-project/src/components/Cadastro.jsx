@@ -55,7 +55,7 @@ function Cadastro({ onBack }) {
                 <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-slate-700/40 rounded-full blur-3xl" />
             </div>
 
-            <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-0 rounded-lg overflow-hidden shadow-2xl">
 
                 {/* ── Painel esquerdo ── */}
                 <div className="hidden md:flex flex-col justify-between bg-slate-800 p-10 text-white">
@@ -114,7 +114,7 @@ function Cadastro({ onBack }) {
                                 <input
                                     type="text" name="name" value={formData.name}
                                     onChange={handleChange} placeholder="O seu nome"
-                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition ${errors.name ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
+                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-md text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition ${errors.name ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
                                 />
                             </div>
                             {errors.name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.name}</p>}
@@ -128,7 +128,7 @@ function Cadastro({ onBack }) {
                                 <input
                                     type="email" name="email" value={formData.email}
                                     onChange={handleChange} placeholder="seu@email.com"
-                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
+                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-md text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
                                 />
                             </div>
                             {errors.email && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.email}</p>}
@@ -142,7 +142,7 @@ function Cadastro({ onBack }) {
                                 <input
                                     type="password" name="password" value={formData.password}
                                     onChange={handleChange} placeholder="Mínimo 6 caracteres"
-                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
+                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-md text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
                                 />
                             </div>
                             {errors.password && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.password}</p>}
@@ -156,7 +156,7 @@ function Cadastro({ onBack }) {
                                 <select
                                     name="role" value={formData.role}
                                     onChange={handleChange}
-                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl text-sm text-slate-800 focus:outline-none transition appearance-none bg-white ${errors.role ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
+                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-md text-sm text-slate-800 focus:outline-none transition appearance-none bg-white ${errors.role ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
                                 >
                                     <option value="">Selecione o tipo de conta</option>
                                     <option value="client">Cliente</option>
@@ -170,7 +170,7 @@ function Cadastro({ onBack }) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+                            className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
                         >
                             {isLoading ? (
                                 <>

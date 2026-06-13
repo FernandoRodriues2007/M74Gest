@@ -9,6 +9,47 @@ import Vendas from './Vendas';
 import Perfil from './Perfil';
 import { getInitials } from '../utils/avatar';
 
+const NAV_ITEMS = [
+  { key: 'home',     label: 'Dashboard', icon: <BarChart3  className="w-5 h-5" /> },
+  { key: 'produtos', label: 'Produtos',  icon: <Package    className="w-5 h-5" /> },
+  { key: 'clientes', label: 'Clientes',  icon: <Users      className="w-5 h-5" /> },
+  { key: 'vendas',   label: 'Vendas',    icon: <DollarSign className="w-5 h-5" /> },
+  { key: 'perfil',   label: 'Perfil',    icon: <User       className="w-5 h-5" /> },
+];
+
+function NavContent({ activeTab, onNav, onLogout }) {
+  return (
+    <>
+      <div className="space-y-8">
+        <h1 className="text-3xl text-slate-100 font-bold">M74</h1>
+        <nav className="space-y-2 grid grid-cols-1 text-start">
+          {NAV_ITEMS.map(({ key, label, icon }) => (
+            <button
+              key={key}
+              onClick={() => onNav(key)}
+              className={`flex gap-4 items-center p-3 rounded-md transition duration-300 ${
+                activeTab === key
+                  ? 'bg-white text-slate-800 font-bold'
+                  : 'text-white hover:text-slate-800 hover:bg-white'
+              }`}
+            >
+              {icon}
+              {label}
+            </button>
+          ))}
+        </nav>
+      </div>
+      <button
+        onClick={onLogout}
+        className="flex items-center gap-2 w-full py-2 px-4 rounded-md text-white border border-slate-600 hover:bg-slate-700 transition"
+      >
+        <LogOut className="w-4 h-4" />
+        Sair
+      </button>
+    </>
+  );
+}
+
 function HomeContent({ user }) {
   return (
     <section className="p-6 space-y-6">
@@ -18,7 +59,6 @@ function HomeContent({ user }) {
         </h2>
         <p className="text-slate-500 mt-1">Gerencie a sua loja de forma simples e segura</p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-600">
           <p className="text-slate-600 text-sm font-semibold mb-2">Produtos</p>
@@ -37,12 +77,20 @@ function HomeContent({ user }) {
   );
 }
 
+const TAB_TITLES = {
+  home:     'Dashboard',
+  produtos: 'Produtos',
+  clientes: 'Clientes',
+  vendas:   'Vendas',
+  perfil:   'Meu Perfil',
+};
+
 function Home() {
   const [activeTab, setActiveTab] = useState('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
 
-  const handleLogout = () => logout();
+  const handleNav = (key) => { setActiveTab(key); setSidebarOpen(false); };
 
   const roleLabel = () => {
     if (user?.role === 'admin') return 'Administrador';
@@ -50,75 +98,25 @@ function Home() {
     return 'Funcionário';
   };
 
-  const navItems = [
-    { key: 'home',     label: 'Dashboard', Icon: BarChart3  },
-    { key: 'produtos', label: 'Produtos',  Icon: Package    },
-    { key: 'clientes', label: 'Clientes',  Icon: Users      },
-    { key: 'vendas',   label: 'Vendas',    Icon: DollarSign },
-    { key: 'perfil',   label: 'Perfil',    Icon: User       },
-  ];
-
-  const tabTitles = {
-    home:     'Dashboard',
-    produtos: 'Produtos',
-    clientes: 'Clientes',
-    vendas:   'Vendas',
-    perfil:   'Meu Perfil',
-  };
-
-  const NavContent = () => (
-    <>
-      <div className="space-y-8">
-        <h1 className="text-3xl text-slate-100 font-bold">M74</h1>
-        <nav className="space-y-2 grid grid-cols-1 text-start">
-          {navItems.map(({ key, label, Icon }) => (
-            <button
-              key={key}
-              onClick={() => { setActiveTab(key); setSidebarOpen(false); }}
-              className={`flex gap-4 items-center p-3 rounded-md transition duration-300 ${
-                activeTab === key
-                  ? 'bg-white text-slate-800 font-bold'
-                  : 'text-white hover:text-slate-800 hover:bg-white'
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              {label}
-            </button>
-          ))}
-        </nav>
-      </div>
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-2 w-full py-2 px-4 rounded-md text-white border border-slate-600 hover:bg-slate-700 transition"
-      >
-        <LogOut className="w-4 h-4" />
-        Sair
-      </button>
-    </>
-  );
-
   return (
     <div className="bg-slate-100 min-h-screen flex flex-col md:grid md:grid-cols-6">
 
-      {/* ── Sidebar desktop ── */}
+      {/* Sidebar desktop */}
       <aside className="hidden md:flex flex-col justify-between bg-slate-800 p-7">
-        <NavContent />
+        <NavContent activeTab={activeTab} onNav={handleNav} onLogout={logout} />
       </aside>
 
-      {/* ── Drawer mobile ── */}
+      {/* Drawer mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
           <div className="w-64 bg-slate-800 p-7 flex flex-col justify-between shadow-2xl">
-            <NavContent />
+            <NavContent activeTab={activeTab} onNav={handleNav} onLogout={logout} />
           </div>
           <div className="flex-1 bg-black/50" onClick={() => setSidebarOpen(false)} />
         </div>
       )}
 
-      {/* ── Conteúdo principal ── */}
       <div className="col-span-5 flex flex-col h-screen overflow-hidden">
-
-        {/* Header */}
         <header className="flex w-full p-4 justify-between items-center bg-white shadow-sm shrink-0">
           <div className="flex items-center gap-3">
             <button
@@ -127,11 +125,11 @@ function Home() {
             >
               {sidebarOpen ? <X className="w-5 h-5 text-slate-700" /> : <Menu className="w-5 h-5 text-slate-700" />}
             </button>
-            <Title Title={tabTitles[activeTab]} />
+            <Title Title={TAB_TITLES[activeTab]} />
           </div>
           <div className="flex items-center gap-3">
             <Infouser Nome={user?.name || 'Utilizador'} user={roleLabel()} />
-            <button onClick={() => { setActiveTab('perfil'); setSidebarOpen(false); }}>
+            <button onClick={() => handleNav('perfil')}>
               <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold hover:bg-blue-700 transition">
                 {getInitials(user?.name)}
               </div>
@@ -141,7 +139,6 @@ function Home() {
 
         <hr className="border-slate-200 shrink-0" />
 
-        {/* Conteúdo com scroll */}
         <main className="flex-1 overflow-y-auto">
           {activeTab === 'home'     && <HomeContent user={user} />}
           {activeTab === 'produtos' && <Produtos />}

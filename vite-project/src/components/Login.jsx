@@ -33,7 +33,7 @@ function Login() {
     const irParaCadastro = () => navigate('/cadastro');
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-slate-300 flex items-center justify-center p-4">
 
             {/* Decoração de fundo */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -41,10 +41,10 @@ function Login() {
                 <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-slate-700/40 rounded-full blur-3xl" />
             </div>
 
-            <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-0 rounded-lg overflow-hidden shadow-2xl">
 
                 {/* ── Painel esquerdo ── */}
-                <div className="hidden md:flex flex-col justify-between bg-blue-600 p-10 text-white">
+                <div className="hidden md:flex flex-col justify-between bg-slate-800 p-10 text-white">
                     <div>
                         <h1 className="text-4xl font-black tracking-tight mb-1">M74</h1>
                         <p className="text-blue-200 text-sm">Gestão Inteligente</p>
@@ -56,7 +56,7 @@ function Login() {
                         <p className="text-blue-100 text-sm mb-8 leading-relaxed">
                             Aceda ao seu painel e gira os seus produtos, clientes e vendas de forma simples.
                         </p>
-                        <div className="border-t border-blue-500 pt-6">
+                        <div className="border-t border-white pt-6">
                             <p className="text-blue-200 text-sm mb-3">Ainda não tem conta?</p>
                             <button
                                 onClick={irParaCadastro}
@@ -98,7 +98,7 @@ function Login() {
                                     placeholder="seu@email.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-md text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                                 />
                             </div>
                         </div>
@@ -112,7 +112,7 @@ function Login() {
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 pr-10 py-3 border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
+                                    className="w-full pl-10 pr-10 py-3 border-2 border-slate-200 rounded-md text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                                 />
                                 <button
                                     type="button"
@@ -127,7 +127,7 @@ function Login() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+                            className="w-full bg-slate-800 text-white py-3 rounded-md font-semibold text-sm hover:bg-slate-900 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
                         >
                             {isLoading ? (
                                 <>
